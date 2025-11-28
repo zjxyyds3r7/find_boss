@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IP地址和端口管理</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .ip-port-group {
+            margin-bottom: 10px;
+        }
+
+        .ip-port-group input {
+            margin-right: 5px;
+        }
+
+        .ip-port-group button {
+            margin-left: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>IP地址和端口管理</h1>
+    <div id="ip-port-container">
+        <!-- <div class="ip-port-group">
+            <input type="text" placeholder="IP地址" class="ip-input">
+            <input type="text" placeholder="端口" class="port-input">
+            <button onclick="removeGroup(this)">删除</button>
+        </div> -->
+    </div>
+    <button onclick="addGroup()">添加IP地址和端口</button>
+    <button onclick="saveData()">保存</button>
+
+    <script>
+        function addGroup() {
+            const container = document.getElementById('ip-port-container');
+            const newGroup = document.createElement('div');
+            newGroup.className = 'ip-port-group';
+            newGroup.innerHTML = `
+                <input type="text" placeholder="IP地址" class="ip-input">
+                <input type="text" placeholder="端口" class="port-input">
+                <button onclick="removeGroup(this)">删除</button>
+            `;
+            container.appendChild(newGroup);
+        }
+
+        function removeGroup(button) {
+            const group = button.parentElement;
+            group.remove();
+        }
+
+        function saveData() {
+            const container = document.getElementById('ip-port-container');
+            const groups = container.getElementsByClassName('ip-port-group');
+            const data = [];
+
+            for (let i = 0; i < groups.length; i++) {
+                const ipInput = groups[i].querySelector('.ip-input');
+                const portInput = groups[i].querySelector('.port-input');
+                const ip = ipInput.value.trim();
+                const port = portInput.value.trim();
+
+                if (ip && port) {
+                    data.push({ ip: ip, port: port });
+                }
+            }
+
+            console.log(data); // 这里可以替换为你自己的逻辑，比如发送到服务器
+            fetch('/saveIP', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 'data': data })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    alert("后端响应：\n" + JSON.stringify(data));
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+
+        function addExistingIpPort(ip, port) {
+            const container = document.getElementById('ip-port-container');
+            const newGroup = document.createElement('div');
+            newGroup.className = 'ip-port-group';
+            newGroup.innerHTML = `
+                <input type="text" class="ip-input" value="${ip}">
+                <input type="text" class="port-input" value="${port}">
+                <button onclick="removeGroup(this)">删除</button>
+            `;
+            container.appendChild(newGroup);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch('/getAllIP', {
+                method: 'GET',
+
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // alert("后端响应：\n" + JSON.stringify(data));
+                    // var res = JSON.stringify(data)
+                    var res = data
+                    console.log(typeof res)
+                    res = res.data
+                    console.log(res)
+                    res.forEach((value, index) => {
+                        // console.log(`索引: ${index}, 值: ${value}`);
+                        addExistingIpPort(value.ip, value.port)
+                    });
+
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        });
+    </script>
+</body>
+
+</html>
