@@ -24,7 +24,7 @@ def play_audio_with_volume(path, volume_percentage):
 
 # 示例用法
 
-play_audio_with_volume("happy.mp3", 100)
+# play_audio_with_volume("happy.mp3", 100)
 
 @app.get("/warning")
 async def root():
@@ -38,4 +38,5 @@ async def root():
 
 if __name__ == '__main__':
     import uvicorn
+
     uvicorn.run(app="main:app", host="0.0.0.0", port=8000, reload=True)
