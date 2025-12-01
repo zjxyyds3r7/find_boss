@@ -112,7 +112,7 @@ def main():
     parser.add_argument('--img-save-path', type=str, default='jupyter_result.jpg', help='Path to Load Test Image.')
     parser.add_argument('--classes-num', type=int, default=80, help='Classes Num to Detect.')
     parser.add_argument('--iou-thres', type=float, default=0.45, help='IoU threshold.')
-    parser.add_argument('--conf-thres', type=float, default=0.25, help='confidence threshold.')
+    parser.add_argument('--conf-thres', type=float, default=0.5, help='confidence threshold.')
     parser.add_argument('--anchors', type=lambda s: list(map(int, s.split(','))), 
                         default=[10, 13, 16, 30, 33, 23, 30, 61, 62, 45, 59, 119, 116, 90, 156, 198, 373, 326],
                         help='--anchors 10,13,16,30,33,23,30,61,62,45,59,119,116,90,156,198,373,326')
@@ -130,6 +130,7 @@ def main():
     t = time()
     while True:
         _, img = cap.read()
+        out_img = img.copy()
         # # 读图
         # img = cv2.imread(opt.test_img)
         # 准备输入数据
@@ -142,14 +143,16 @@ def main():
         # logger.info("\033[1;32m" + "Draw Results: " + "\033[0m")
         p = False
         for class_id, score, bbox in zip(ids, scores, bboxes):
-            if class_id == 0:
+            x1, y1, x2, y2 = bbox
+            if class_id == 0 and (x2-x1) * (y2-y1) > 1000:
                 p = True
-            # x1, y1, x2, y2 = bbox
-            # logger.info("(%d, %d, %d, %d) -> %s: %.2f"%(x1,y1,x2,y2, coco_names[class_id], score))
-            # draw_detection(img, (x1, y1, x2, y2), score, class_id)
+            
+                # logger.info("(%d, %d, %d, %d) -> %s: %.2f"%(x1,y1,x2,y2, coco_names[class_id], score))
+                draw_detection(out_img, (x1, y1, x2, y2), score, class_id)
         if p:
             person += 1
             cv2.imwrite(f'/home/sunrise/Desktop/find_boss/images/' + datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + '.jpg', img)
+            cv2.imwrite(f'/home/sunrise/Desktop/find_boss/images_label/' + datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + '.jpg', out_img)
         else:
             person = 0
         if person > 6:
@@ -157,6 +160,8 @@ def main():
                 send()
                 t = time()
             person = 0
+
+            
         # 保存结果
         # cv2.imwrite(opt.img_save_path, img)
         # cv2.imshow('img', img)
