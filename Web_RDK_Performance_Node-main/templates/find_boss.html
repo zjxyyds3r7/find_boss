@@ -7,35 +7,114 @@
     <title>IP地址和端口管理</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
         }
 
         .ip-port-group {
+            display: flex;
+            align-items: center;
             margin-bottom: 10px;
         }
 
         .ip-port-group input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
             margin-right: 5px;
+            font-size: 14px;
+        }
+
+        .ip-port-group input:focus {
+            border-color: #007bff;
+            outline: none;
         }
 
         .ip-port-group button {
-            margin-left: 5px;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            background-color: #dc3545;
+            color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .ip-port-group button:hover {
+            background-color: #a71d2a;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .button-container button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .button-container button:first-child {
+            background-color: #28a745;
+            color: #fff;
+        }
+
+        .button-container button:first-child:hover {
+            background-color: #1e6e35;
+        }
+
+        .button-container button:last-child {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        .button-container button:last-child:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
 
 <body>
-    <h1>IP地址和端口管理</h1>
-    <div id="ip-port-container">
-        <!-- <div class="ip-port-group">
-            <input type="text" placeholder="IP地址" class="ip-input">
-            <input type="text" placeholder="端口" class="port-input">
-            <button onclick="removeGroup(this)">删除</button>
-        </div> -->
+    <div class="container">
+        <h1>IP地址和端口管理</h1>
+        <div id="ip-port-container">
+            <!-- <div class="ip-port-group">
+                <input type="text" placeholder="IP地址" class="ip-input">
+                <input type="text" placeholder="端口" class="port-input">
+                <button onclick="removeGroup(this)">删除</button>
+            </div> -->
+        </div>
+        <div class="button-container">
+            <button onclick="addGroup()">添加IP地址和端口</button>
+            <button onclick="saveData()">保存</button>
+        </div>
     </div>
-    <button onclick="addGroup()">添加IP地址和端口</button>
-    <button onclick="saveData()">保存</button>
 
     <script>
         function addGroup() {
