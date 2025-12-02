@@ -12,12 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, Response
 from psutil import cpu_percent, virtual_memory, disk_usage
 from os import system
 import argparse
 
 from time import time
+import cv2
 
 DEVICE_NAME = "rdkx5"
 DEVICE_NUM = 2 # 0:rdkx3, 1:rdkultra 2:rdkx5
@@ -36,6 +37,10 @@ def index_wide():
 @app.route("/findboss")
 def findboss():
     return render_template("find_boss.html")
+
+@app.route("/video_page")
+def video_page():
+    return render_template("video_page.html")
 
 # 请求CPU, BPU, Memory, Tempture 信息（快速）
 root_path = '/home/sunrise/Desktop/yolo_workspace/Web_RDK_Performance_Node-main/'
@@ -248,6 +253,25 @@ def saveIP():
             print(f"ip: {i['ip']}\tport:{i['port']}")
             f.write(f"{i['ip']} {i['port']}\n")
     return {'data': 'OK'}
+
+def generate_frames():
+    cap = cv2.VideoCapture("rtsp://localhost:8554/stream")  # 替换为你的RTSP流地址
+    while True:
+        success, frame = cap.read()
+        if not success:
+            break
+        else:
+            # 转码至JPEG格式
+            ret, buffer = cv2.imencode('.jpg', frame)
+            frame = buffer.tobytes()
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+    cap.release()
+
+@app.route('/video')
+def video():
+    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
 
 
 if __name__ == "__main__":

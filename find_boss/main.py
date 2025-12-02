@@ -135,6 +135,29 @@ def main():
     logger.info(opt)
 
     cap = cv2.VideoCapture(find_first_usb_camera())
+
+    # command = [
+    #     'ffmpeg',
+    #     '-f', 'rawvideo',
+    #     '-vcodec', 'rawvideo',
+    #     '-pix_fmt', 'bgr24',
+    #     '-s', f"{int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))}x{int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))}",
+    #     '-r', str(int(cap.get(cv2.CAP_PROP_FPS))),
+    #     '-i', '-', # 从标准输入读取数据
+    #     '-c:v', 'libx264',
+    #     '-f', 'rtsp',
+    #     'rtsp://localhost:8554/live/stream'
+    # ]
+    # process = subprocess.Popen(command, stdin=subprocess.PIPE)
+
+    # rtsp_url = 'rtsp://localhost:8554/stream'
+    # process = (
+    #     ffmpeg
+    #     .input('pipe:', format='rawvideo', pix_fmt='bgr24', s='640x480', framerate=25)
+    #     .output(rtsp_url, format='rtsp')
+    #     .overwrite_output()
+    #     .run_async(pipe_stdin=True)
+    # )
     
     # 实例化
     model = YOLOv5_Detect(opt.model_path, opt.conf_thres, opt.iou_thres, opt.classes_num, opt.anchors, opt.strides)
