@@ -16,7 +16,8 @@
 
 # 注意: 此程序在RDK板端端运行
 # Attention: This program runs on RDK board.
-import os 
+import os
+import subprocess 
 import cv2
 import numpy as np
 from scipy.special import softmax
@@ -27,7 +28,7 @@ from time import time
 import argparse
 import logging 
 import datetime
-
+import ffmpeg
 # 日志模块配置
 # logging configs
 logging.basicConfig(
@@ -98,7 +99,18 @@ def send():
         # return {'data': [{'ip': i.split()[0], 'port': i.split()[1]} for i in res]}
     start_threads(ip_port_list)
 
+
+rtsp_url = 'rtsp://localhost:8554/stream'
+process = (
+    ffmpeg
+    .input('pipe:', format='rawvideo', pix_fmt='bgr24', s='640x480', framerate=25)
+    .output(rtsp_url, format='rtsp')
+    .overwrite_output()
+    .run_async(pipe_stdin=True)
+)
+
 def main():
+
     parser = argparse.ArgumentParser()
     # parser.add_argument('--model-path', type=str, default='models/yolov5s_672x672_nv12.bin', 
     parser.add_argument('--model-path', type=str, default='/home/sunrise/Desktop/find_boss/yolov5s_tag_v7.0_detect_640x640_bayese_nv12.bin', 
@@ -123,13 +135,14 @@ def main():
     logger.info(opt)
 
     cap = cv2.VideoCapture(find_first_usb_camera())
-
+    
     # 实例化
     model = YOLOv5_Detect(opt.model_path, opt.conf_thres, opt.iou_thres, opt.classes_num, opt.anchors, opt.strides)
     person = 0
     t = time()
     while True:
         _, img = cap.read()
+        
         out_img = img.copy()
         # # 读图
         # img = cv2.imread(opt.test_img)
@@ -144,7 +157,7 @@ def main():
         p = False
         for class_id, score, bbox in zip(ids, scores, bboxes):
             x1, y1, x2, y2 = bbox
-            if class_id == 0 and (x2-x1) * (y2-y1) > 1000:
+            if class_id == 0 and (x2-x1) * (y2-y1) > 2500:
                 p = True
             
                 # logger.info("(%d, %d, %d, %d) -> %s: %.2f"%(x1,y1,x2,y2, coco_names[class_id], score))
@@ -153,6 +166,7 @@ def main():
             person += 1
             cv2.imwrite(f'/home/sunrise/Desktop/find_boss/images/' + datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + '.jpg', img)
             cv2.imwrite(f'/home/sunrise/Desktop/find_boss/images_label/' + datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + '.jpg', out_img)
+            # process.stdin.write(img.tobytes())
         else:
             person = 0
         if person > 6:
@@ -160,7 +174,7 @@ def main():
                 send()
                 t = time()
             person = 0
-
+        process.stdin.write(out_img.tobytes())
             
         # 保存结果
         # cv2.imwrite(opt.img_save_path, img)
@@ -416,6 +430,8 @@ def draw_detection(img: np.array,
         img, (label_x, label_y - label_height), (label_x + label_width, label_y + label_height), color, cv2.FILLED
     )
     cv2.putText(img, label, (label_x, label_y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
+
+
 
 if __name__ == "__main__":
     main()
